@@ -1,0 +1,98 @@
+package com.platformer.engine;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+public class Game extends JFrame{
+	static JPanel display = new JPanel();
+	public static final int FPS = 60;
+	public static final int WIDTH = 800;
+	public static final int HEIGHT = 600;
+	private static boolean isRunning = true;
+	public Tile t;
+	public Tile t2;
+	public Player p;
+	public Player p2;
+	public static void main(String[] args){
+			Game game = new Game();
+			game.run();
+			System.exit(0);
+	}
+	
+	public void run(){
+		init();
+		while(isRunning){
+			long time = System.nanoTime();
+
+			update();
+			draw();
+			time = (1000000/FPS) - System.nanoTime();
+			
+			if(time > 0){
+				try{
+					Thread.sleep(time);
+				}catch(Exception e){
+					
+				}
+			}
+		}
+		this.setVisible(false);
+
+	}
+	
+	Insets insets;
+	InputHandler input;
+	public void init(){
+		this.setTitle("PlatformerEngine");
+		this.setSize(WIDTH, HEIGHT);
+		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		this.setResizable(false);
+		this.setVisible(true);
+		insets = this.getInsets();
+		this.setSize(insets.left+WIDTH+insets.right, insets.top + HEIGHT + insets.bottom);
+		this.input = new InputHandler(this);
+		p = new Player(WIDTH/2, HEIGHT/2, 32, 64);
+		p.Init(gh, input, this);
+		p.InitControl(KeyEvent.VK_W, KeyEvent.VK_A, KeyEvent.VK_D);
+		p2 = new Player(WIDTH/2, HEIGHT/2, 32, 64);
+		p2.Init(gh, input, this);
+		p2.InitControl(KeyEvent.VK_UP, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT);
+		t = new Tile(10, 15);
+		t.g = gh;
+		t2 = new Tile(12, 15);
+		t2.g = gh;
+	}
+	
+	public void update(){
+		p.update();
+		p.collide(t.boundingBox);
+		p.collide(t2.boundingBox);
+
+	}
+	
+	BufferedImage backBuffer = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+	GraphicsHandler gh = new GraphicsHandler(backBuffer.getGraphics());
+	public void draw(){
+		//start graphics
+		Graphics g = this.getGraphics();
+		//Setup background
+		gh.background(0);
+		gh.drawBackground(WIDTH, HEIGHT);
+
+		t.draw();
+		t2.draw();
+		p.draw();
+		//end graphics
+		g.drawImage(backBuffer, insets.left, insets.top, this);
+		
+	}
+}
