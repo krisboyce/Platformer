@@ -17,9 +17,9 @@ public class Game extends JFrame {
 	 */
 	private static final long serialVersionUID = 1L;
 	static JPanel display = new JPanel();
-	public static final int FPS = 30;
+	public static final int FPS = 60;
 	public static final int Skips = 1000 / FPS;
-	public static final int maxSkips = 10;
+	public static final int maxSkips = 5;
 	public static final int WIDTH = 768;
 	public static final int HEIGHT = 512;
 	public static long startTime = System.currentTimeMillis();
