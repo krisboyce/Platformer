@@ -1,0 +1,6 @@
+package com.platformer.engine;
+
+public enum TileType {
+	BRICK
+	
+}
