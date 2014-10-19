@@ -16,10 +16,10 @@ public class Player {
 	public Container c;
 	public int up, left, right;
 	public Rectangle boundingBox;
-	boolean jumping = false;
+	boolean jumping = true;
 	boolean grounded = false;
-	public int Jumps = 0;
-	public int MaxJumps = 2;
+	public int Jumps = 3;
+	public int MaxJumps = 3;
 
 	public Player(int x, int y, int width, int height) {
 		this.Position = new Point(x, y);
@@ -45,12 +45,12 @@ public class Player {
 		this.boundingBox.x = this.Position.x;
 		this.boundingBox.y = this.Position.y;
 		this.Position.translate(this.Velocity.x, this.Velocity.y);
-		if (this.Velocity.y <= 0) {
-			this.Velocity.y += 2;
+		if (this.Velocity.y <= 3) {
+			this.Velocity.y += 3;
 		}
 		if (i.isKeyDown(up) && grounded) {
 			Jumps = 0;
-			this.Velocity.y -= 25;
+			this.Velocity.y = -20;
 			Jumps = Jumps + 1;
 
 			jumping = true;
@@ -64,7 +64,7 @@ public class Player {
 			jumping = true;
 		}
 		if (i.isKeyDown(left) && this.Velocity.x > -4) {
-			this.Velocity.x -= 2;
+			this.Velocity.x -= 1;
 		}
 		if (!i.isKeyDown(left) && this.Velocity.x < 0) {
 			this.Velocity.x += 1;
@@ -91,22 +91,23 @@ public class Player {
 		if (predictedLoc.intersects(r)) {
 			Rectangle collision = predictedLoc.intersection(r);
 			if (collision.width > collision.height) {
-				if (this.Velocity.y > 0) {
-					this.Position.y = r.y - this.Size.height - 2;
+				if (this.Velocity.y > 0 && this.Position.y+this.Size.height-3<r.y) {
+					this.Position.y = r.y - this.Size.height;
+					this.Velocity.y = 0;
 					this.Jumps = 0;
-				} else if (this.Velocity.y < 0) {
-					this.Position.y = r.y + r.height;
+					grounded = true;
+				} else if (this.Velocity.y < 0 && this.Position.y > r.y && (this.Position.x < r.x+r.width || this.Position.x+this.Size.width > r.x)) {
+					this.Position.y = collision.y + collision.height;
 					this.Velocity.y = 0;
 
 				}
 			} else if (collision.width < collision.height) {
-				if (this.Velocity.x > 0 && this.Position.y < r.y + r.height
-						&& boundingBox.y + boundingBox.height > r.y + 2) {
-
+				if (this.Velocity.x > 0 && this.Position.x+this.Size.width < r.x+r.width && this.Position.y < r.y+r.height && this.Position.y+this.Size.height>r.y) {
+						this.Velocity.x = 0;
 					this.Position.x = r.x - this.Size.width;
 				} else if (this.Velocity.x < 0
-						&& this.Position.y < r.y + r.height
-						&& boundingBox.y + boundingBox.height > r.y + 2) {
+						&& this.Position.x > r.x && this.Position.y < r.y+r.height && this.Position.y+this.Size.height>r.y) {
+					this.Velocity.x = 0;
 					this.Position.x = r.x + r.width;
 				}
 			}

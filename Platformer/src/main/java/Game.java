@@ -23,14 +23,14 @@ public class Game extends JFrame {
 	public static final int WIDTH = 768;
 	public static final int HEIGHT = 512;
 	public static long startTime = System.currentTimeMillis();
-	public int xOffset = 0;
-	public int yOffset = 0;
-	public Point origin = new Point(0, 0);
+	public static int xOffset = 0;
+	public static int yOffset = 0;
+	public static Point origin = new Point(0, 0);
 	private static boolean isRunning = true;
 	public ArrayList<Tile> tiles = new ArrayList<Tile>();
 	public int[][] displayGrid = new int[WIDTH / 32][HEIGHT / 32];
 	public Player p;
-
+	public static boolean building = true;
 	public static void main(String[] args) {
 
 		Game game = new Game();
@@ -93,43 +93,92 @@ public class Game extends JFrame {
 	}
 
 	public void InitEntities() {
-		p = new Player(WIDTH / 2, HEIGHT / 2, 32, 64);
+		p = new Player(WIDTH / 2, HEIGHT / 2, 24, 48);
 		p.Init(gh, input, this);
 		p.InitControl(KeyEvent.VK_W, KeyEvent.VK_A, KeyEvent.VK_D);
 	}
 
 	public void InitTiles() {
 		for (int i = 0; i < WIDTH / 32; i++) {
+			
 			tiles.add(new Tile(i, HEIGHT / 32 - 1, TileType.BRICK));
 		}
-		tiles.add(new Tile(3, HEIGHT/32-3, TileType.BRICK));
+		tiles.add(new Tile(3, HEIGHT/32-2, TileType.BRICK));
+		tiles.add(new Tile(4, HEIGHT/32-3, TileType.BRICK));
+		tiles.add(new Tile(5, HEIGHT/32-4, TileType.BRICK));
+		tiles.add(new Tile(6, HEIGHT/32-5, TileType.BRICK));
+		tiles.add(new Tile(11, HEIGHT/32-2, TileType.BRICK));
+		tiles.add(new Tile(10, HEIGHT/32-3, TileType.BRICK));
+		tiles.add(new Tile(9, HEIGHT/32-4, TileType.BRICK));
+		tiles.add(new Tile(8, HEIGHT/32-5, TileType.BRICK));
 		for (Tile t : tiles) {
 			t.Init(gh);
 		}
 	}
-
+	
+	public void levelBuilder(){
+		if(Game.building){
+			if(input.mousePressed){
+				if(!input.isKeyDown(KeyEvent.VK_SHIFT)){
+				Tile t = new Tile((input.mouseX)/32, (input.mouseY-this.insets.top)/32, TileType.BRICK);
+				tiles.add(t);
+				t.Init(gh);
+				}else{
+					ArrayList<Tile> toRemove = new ArrayList<Tile>();
+					for(Tile t:this.tiles){
+						if(t.Position.x < input.mouseX-insets.left+insets.right && t.Position.x+32 > input.mouseX-insets.left-insets.right && (t.Position.y < input.mouseY-this.insets.top+insets.bottom && t.Position.y+32+this.insets.top+insets.bottom > input.mouseY)){
+							toRemove.add(t);
+						}
+					}
+					for(Tile t:toRemove){
+						tiles.remove(t);
+					}
+				}
+			}
+		}
+	}
+	
 	public void update() {
 		p.update();
+
 		for (Tile t : tiles) {
 			t.update();
 			p.collide(t.boundingBox);
 		}
-		if (p.Position.x > WIDTH - (WIDTH / 4)) {
-			p.Position.x = WIDTH - (WIDTH / 4);
-			xOffset++;
+		if (p.Position.x > WIDTH - (WIDTH / 8)) {
+			p.Velocity.x *= -1;
+			p.Position.x = WIDTH - (WIDTH / 8);
+			xOffset+=32;
 			for (Tile t : tiles) {
-				t.Position.x -= p.Velocity.x;
+				t.Position.x -= 32;
 			}
 		}
-		if (p.Position.x < WIDTH / 4) {
-			p.Position.x = WIDTH / 4;
-			xOffset--;
+		if (p.Position.x < WIDTH / 8) {
+			p.Velocity.x *= -1;
+			p.Position.x = WIDTH / 8;
+			xOffset-=32;
 			for (Tile t : tiles) {
-				t.Position.x -= p.Velocity.x;
+				t.Position.x += 32;
 			}
 		}
-		this.origin.x = (int) Math.floor(xOffset / 32);
-		this.origin.y = (int) Math.floor(yOffset / 32);
+		if(p.Position.y < HEIGHT/64){
+			p.Position.y = 2*HEIGHT / 64;
+			yOffset-=32;
+			for (Tile t : tiles) {
+				t.Position.y += 32;
+			}
+		}
+		if(p.Position.y > 7*HEIGHT/8){
+			p.Velocity.y *= -1;
+			p.Position.y = 55*(HEIGHT / 64);
+			yOffset+=32;
+			for (Tile t : tiles) {
+				t.Position.y -= 32;
+			}
+		}
+		levelBuilder();
+		Game.origin.x = (int) Math.floor(xOffset / 32);
+		Game.origin.y = (int) Math.floor(yOffset / 32);
 	}
 
 	BufferedImage backBuffer = new BufferedImage(WIDTH, HEIGHT,

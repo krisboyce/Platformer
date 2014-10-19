@@ -2,6 +2,7 @@ package main.java;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 
 public class GraphicsHandler {
 	public Graphics g;
@@ -84,5 +85,9 @@ public class GraphicsHandler {
 		g.setColor(background);
 		g.fillRect(0, 0, width, height);
 		g.setColor(fill);
+	}
+	
+	public void image(BufferedImage i, int x, int y, int width, int height){
+		g.drawImage(i, x, y, width, height, null);
 	}
 }
